@@ -2,12 +2,12 @@ const asyncHandler = require('express-async-handler');
 const Project = require('../models/Project');
 const fs = require('fs');
 const path = require('path');
-const uploadToCloudinary = require('../utils/upload');
 const { checkEmpty } = require('../utils/checkEmpty');
 const Technology = require('../models/Technology');
 const Social = require('../models/Social');
 const Carousel = require('../models/Carousel');
 const upload = require('../utils/upload');
+const cloudinary = require('../utils/cloudinary.config');
 
 exports.addProject = asyncHandler(async (req, res) => {
     const {
@@ -120,7 +120,6 @@ exports.deletesocial = asyncHandler(async(req, res)=>{
 
 
 exports.addCarousel = asyncHandler(async (req, res) => {
-
     upload(req, res, async (err) => {
         if (err) {
             return res.status(400).json({ message: "Error in uploading file" });
@@ -133,21 +132,22 @@ exports.addCarousel = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: "ALL FIELDS REQUIRED", error });
         }
 
-      
-        if (!req.files[0]) {
+        if (!req.file) {
             return res.status(400).json({ message: "No image file provided" });
         }
 
-     
-            const {secure_url} = await uploadToCloudinary.uploader.upload(req.files[0].path, {
+        try {
+            const { secure_url } = await cloudinary.uploader.upload(req.file.path, {
                 folder: "carousel",
             });
 
-         
-            await Carousel.create({image: secure_url, desc});
+            await Carousel.create({ image: secure_url, desc });
 
-            res.status(201).json({message: "Carousel created successfully",});
-      
+            res.status(201).json({ message: "Carousel created successfully" });
+        } catch (uploadError) {
+            console.error("Cloudinary upload error:", uploadError);
+            res.status(500).json({ message: "Error uploading to Cloudinary" });
+        }
     });
 });
 exports.getAllCarousel = asyncHandler(async(req, res)=>{
@@ -169,9 +169,9 @@ exports.updateCarousel = asyncHandler(async (req, res) => {
                 }
 
                 const imagePublicId = currentCarousel.image.split("/").pop().split(".")[0];
-                await uploadToCloudinary.uploader.destroy(`carousel/${imagePublicId}`);
+                await cloudinary_js_config.uploader.destroy(`carousel/${imagePublicId}`);
 
-                const {secure_url} = await uploadToCloudinary.uploader.upload(req.files[0].path, {
+                const {secure_url} = await cloudinary_js_config.uploader.upload(req.files[0].path, {
                     folder: "carousel",
                 });
                 img = secure_url
