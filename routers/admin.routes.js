@@ -16,4 +16,10 @@ route
     .put("/update-social/:sid", adminController.updateSocial)
     .delete("/delete-social/:sid", adminController.deletesocial)
 
+
+    .post("/add-carousel", adminController.addCarousel)
+    .get("/get-carousel", adminController.getAllCarousel)
+    .put("/update-carousel/:cid", adminController.updateCarousel)
+    .delete("/delete-carousel/:cid", adminController.deleteCarousel)
+
 module.exports = route

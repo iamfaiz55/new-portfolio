@@ -6,6 +6,8 @@ const uploadToCloudinary = require('../utils/upload');
 const { checkEmpty } = require('../utils/checkEmpty');
 const Technology = require('../models/Technology');
 const Social = require('../models/Social');
+const Carousel = require('../models/Carousel');
+const upload = require('../utils/upload');
 
 exports.addProject = asyncHandler(async (req, res) => {
     const {
@@ -110,6 +112,82 @@ exports.updateSocial = asyncHandler(async(req, res)=>{
 }) 
 exports.deletesocial = asyncHandler(async(req, res)=>{
     const {sid}=req.params
+    await Social.findByIdAndDelete(sid)
+       res.json({message:"Social Delete Success"})
+})
+
+
+
+
+exports.addCarousel = asyncHandler(async (req, res) => {
+
+    upload(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ message: "Error in uploading file" });
+        }
+
+        const { desc } = req.body;
+
+        const { isError, error } = checkEmpty({ desc });
+        if (isError) {
+            return res.status(400).json({ message: "ALL FIELDS REQUIRED", error });
+        }
+
+      
+        if (!req.file) {
+            return res.status(400).json({ message: "No image file provided" });
+        }
+
+     
+            const {secure_url} = await uploadToCloudinary.uploader.upload(req.files[0].path, {
+                folder: "carousel",
+            });
+
+         
+            await Carousel.create({image: secure_url, desc});
+
+            res.status(201).json({message: "Carousel created successfully",});
+      
+    });
+});
+exports.getAllCarousel = asyncHandler(async(req, res)=>{
+    const result = await Carousel.find()
+    res.json({message:"Carousels Get Success", result})
+})
+exports.updateCarousel = asyncHandler(async (req, res) => {
+    const { cId } = req.params;
+
+    upload(req, res, async (err) => {
+        let img
+        if (err) {
+            return res.status(400).json({ message: "Error in uploading file" });
+        }
+            if (req.file) {
+                const currentCarousel = await Carousel.findById(cId);
+                if (!currentCarousel) {
+                    return res.status(404).json({ message: "Carousel not found" });
+                }
+
+                const imagePublicId = currentCarousel.image.split("/").pop().split(".")[0];
+                await uploadToCloudinary.uploader.destroy(`carousel/${imagePublicId}`);
+
+                const {secure_url} = await uploadToCloudinary.uploader.upload(req.files[0].path, {
+                    folder: "carousel",
+                });
+                img = secure_url
+            }
+            await Carousel.findByIdAndUpdate(cId, {...req.body, desc:req.body.desc, image:img});
+            res.status(200).json({message: "Carousel updated successfully"});
+    
+    });
+});
+exports.deleteCarousel = asyncHandler(async(req, res)=>{
+    const {cid}=req.params
+   const result = await Carousel.findById(cid)
+
+    const imagePublicId = result.image.split("/").pop().split(".")[0];
+    await uploadToCloudinary.uploader.destroy(`carousel/${imagePublicId}`);
+
     await Social.findByIdAndDelete(sid)
        res.json({message:"Social Delete Success"})
 })
