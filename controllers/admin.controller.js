@@ -5,6 +5,7 @@ const path = require('path');
 const uploadToCloudinary = require('../utils/upload');
 const { checkEmpty } = require('../utils/checkEmpty');
 const Technology = require('../models/Technology');
+const Social = require('../models/Social');
 
 exports.addProject = asyncHandler(async (req, res) => {
     const {
@@ -85,4 +86,30 @@ exports.deleteTechnology = asyncHandler(async(req, res)=>{
     const {id}=req.params
     await Technology.findByIdAndDelete(id)
        res.json({message:"Technology Delete Success"})
+})
+
+
+exports.addSocial = asyncHandler(async(req, res)=>{
+    const {name, link}=req.body
+   const {isError, error}=checkEmpty({name, link})
+
+   if(isError){
+     return res.status(400). json({message:"ALL FIELDS REQUIRED", error})
+   }
+   await Social.create({name, category})
+   res.json({message:"Social Create Success"})
+})
+exports.getAllSocial = asyncHandler(async(req, res)=>{
+    const result = await Social.find()
+    res.json({message:"Social Get Success", result})
+})
+exports.updateSocial = asyncHandler(async(req, res)=>{
+   const {sid}=req.params
+ await Social.findByIdAndUpdate(sid, req.body)
+    res.json({message:"Social Update Success"})
+}) 
+exports.deletesocial = asyncHandler(async(req, res)=>{
+    const {sid}=req.params
+    await Social.findByIdAndDelete(id)
+       res.json({message:"Social Delete Success"})
 })
