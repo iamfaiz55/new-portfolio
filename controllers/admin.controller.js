@@ -96,7 +96,7 @@ exports.addSocial = asyncHandler(async(req, res)=>{
    if(isError){
      return res.status(400). json({message:"ALL FIELDS REQUIRED", error})
    }
-   await Social.create({name, category})
+   await Social.create({name, link})
    res.json({message:"Social Create Success"})
 })
 exports.getAllSocial = asyncHandler(async(req, res)=>{
@@ -110,6 +110,6 @@ exports.updateSocial = asyncHandler(async(req, res)=>{
 }) 
 exports.deletesocial = asyncHandler(async(req, res)=>{
     const {sid}=req.params
-    await Social.findByIdAndDelete(id)
+    await Social.findByIdAndDelete(sid)
        res.json({message:"Social Delete Success"})
 })
