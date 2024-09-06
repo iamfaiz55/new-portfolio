@@ -134,7 +134,7 @@ exports.addCarousel = asyncHandler(async (req, res) => {
         }
 
       
-        if (!req.file) {
+        if (!req.files[0]) {
             return res.status(400).json({ message: "No image file provided" });
         }
 
